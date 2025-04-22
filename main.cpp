@@ -38,9 +38,18 @@ void handle_request(http::request<http::string_body>& req, http::response<http::
     
     res.version(req.version());
     res.result(http::status::ok);
-    res.set(http::field::server, BOOST_BEAST_VERSION_STRING);
-    res.set("Time-Arrival-Seconds", std::to_string(seconds));
-    res.set("Time-Arrival-Nanoseconds", std::to_string(nanoseconds));
+    res.set(http::field::server, "OUR.TEST.SERVER/28");
+    
+    auto it = req.find("X-Arrived-Client-sec");
+    if (it != req.end()) {
+        res.set("X-Arrived-Client-sec", it->value());
+    }
+    it = req.find("X-Arrived-Client-nano");
+    if (it != req.end()) {
+        res.set("X-Arrived-Client-nano", it->value());
+    }
+    res.set("X-Time-Arrival-Seconds", std::to_string(seconds));
+    res.set("X-Time-Arrival-Nanoseconds", std::to_string(nanoseconds));
     res.body() = generate_random_text(); // Generate random text of length 100
     res.prepare_payload();
 }
