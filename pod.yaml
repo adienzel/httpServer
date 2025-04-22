@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: boost-beast-server
+spec:
+  containers:
+    - name: boost-beast-server
+      image: your-dockerhub-username/boost-beast-server:latest
+      ports:
+        - containerPort: 8080
