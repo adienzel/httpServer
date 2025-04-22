@@ -65,21 +65,39 @@ void do_session(tcp::socket& socket) {
 int main() {
     try {
         auto const address = boost::asio::ip::make_address("0.0.0.0");
-        unsigned short port = static_cast<unsigned short>(std::atoi("8080"));
+        auto port = static_cast<unsigned short>(std::atoi("8080"));
         
         boost::asio::io_context ioc{1};
         tcp::acceptor acceptor{ioc, {address, port}};
-        tcp::socket socket{ioc};
+//        tcp::socket socket{ioc};
         
-        std::srand(std::time(nullptr)); // Seed for random text generation
         
         std::cout << "Server is running on port " << port << std::endl;
-        
-        while (true) {
-            acceptor.accept(socket);
-            do_session(socket);
-            socket.shutdown(tcp::socket::shutdown_send);
+    
+    
+        // Create a pool of threads to run the io_context
+        std::vector<std::thread> threads;
+        //future add parameter for num of thereads or thake all allocated 
+        unsigned int num_threads = 4; //std::thread::hardware_concurrency();
+        for (unsigned int i = 0; i < num_threads; ++i) {
+            threads.emplace_back(&ioc { ioc.run(); });
         }
+    
+        while (true) {
+            tcp::socket socket{ioc};
+            acceptor.accept(socket);
+            std::thread{std::bind(&do_session, std::move(socket))}.detach();
+    
+//            acceptor.accept(socket);
+//            do_session(socket);
+//            socket.shutdown(tcp::socket::shutdown_send);
+        }
+    
+        // Join the threads
+        for (auto& t : threads) {
+            t.join();
+        }
+    
     } catch (std::exception const& e) {
         std::cerr << "Error: " << e.what() << std::endl;
         return EXIT_FAILURE;
