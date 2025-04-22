@@ -7,17 +7,25 @@
 #include <ctime>
 #include <iostream>
 #include <string>
+#include <random>
 
 using tcp = boost::asio::ip::tcp;       // from <boost/asio.hpp>
 namespace http = boost::beast::http;    // from <boost/beast/http.hpp>
 
+
+std::random_device device{};
+std::mt19937 generator(device());
+std::uniform_int_distribution<long> distribution(1, (long) 1e12);
+static long transactionCounter = distribution(generator);
+
 // Function to generate random text
-std::string generate_random_text(size_t length) {
+std::string generate_random_text() {
     const char charset[] = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
     std::string result;
+    auto length = distribution(generator) % 4096;
     result.reserve(length);
     for (size_t i = 0; i < length; ++i) {
-        result += charset[rand() % (sizeof(charset) - 1)];
+        result += charset[distribution(generator) % (sizeof(charset) - 1)];
     }
     return result;
 }
@@ -33,7 +41,7 @@ void handle_request(http::request<http::string_body>& req, http::response<http::
     res.set(http::field::server, BOOST_BEAST_VERSION_STRING);
     res.set("Time-Arrival-Seconds", std::to_string(seconds));
     res.set("Time-Arrival-Nanoseconds", std::to_string(nanoseconds));
-    res.body() = generate_random_text(100); // Generate random text of length 100
+    res.body() = generate_random_text(); // Generate random text of length 100
     res.prepare_payload();
 }
 
