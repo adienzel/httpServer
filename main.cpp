@@ -67,7 +67,7 @@ int main() {
         auto const address = boost::asio::ip::make_address("0.0.0.0");
         auto port = static_cast<unsigned short>(std::atoi("8080"));
         
-        boost::asio::io_context ioc{1};
+        boost::asio::io_context ioc;
         tcp::acceptor acceptor{ioc, {address, port}};
 //        tcp::socket socket{ioc};
         
@@ -80,14 +80,15 @@ int main() {
         //future add parameter for num of thereads or thake all allocated 
         unsigned int num_threads = 4; //std::thread::hardware_concurrency();
         for (unsigned int i = 0; i < num_threads; ++i) {
-            threads.emplace_back(&ioc { ioc.run(); });
+            threads.emplace_back([&ioc](){ioc.run();});
+    
         }
     
         while (true) {
             tcp::socket socket{ioc};
             acceptor.accept(socket);
-            std::thread{std::bind(&do_session, std::move(socket))}.detach();
-    
+            //std::thread{std::bind(&do_session, std::move(socket))}.detach();
+            std::thread{[&socket] { do_session(socket); }}.detach();
 //            acceptor.accept(socket);
 //            do_session(socket);
 //            socket.shutdown(tcp::socket::shutdown_send);
