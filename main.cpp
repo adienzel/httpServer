@@ -22,7 +22,10 @@ static long transactionCounter = distribution(generator);
 std::string generate_random_text() {
     const char charset[] = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
     std::string result;
-    auto length = distribution(generator) % 4096;
+    auto length = distribution(generator) % 1024;
+    if (length < 10) {
+        return "";
+    }
     result.reserve(length);
     for (size_t i = 0; i < length; ++i) {
         result += charset[distribution(generator) % (sizeof(charset) - 1)];
@@ -33,23 +36,20 @@ std::string generate_random_text() {
 // Function to handle HTTP requests
 void handle_request(http::request<http::string_body>& req, http::response<http::string_body>& res) {
     auto now = std::chrono::system_clock::now();
-    auto seconds = std::chrono::duration_cast<std::chrono::seconds>(now.time_since_epoch()).count();
-    auto nanoseconds = std::chrono::duration_cast<std::chrono::nanoseconds>(now.time_since_epoch()).count() % 1000000000;
+    //auto seconds = std::chrono::duration_cast<std::chrono::seconds>(now.time_since_epoch()).count();
+    auto nanoseconds = std::chrono::duration_cast<std::chrono::nanoseconds>(now.time_since_epoch()).count();
+    
+    //auto time_value = std::to_string((double)seconds + (double)nanoseconds * 10e-9);
     
     res.version(req.version());
     res.result(http::status::ok);
     res.set(http::field::server, "OUR.TEST.SERVER/28");
     
-    auto it = req.find("X-Arrived-Client-sec");
+    auto it = req.find("X-Arrived-Client-time");
     if (it != req.end()) {
-        res.set("X-Arrived-Client-sec", it->value());
+        res.set("X-Arrived-Client-time", it->value());
     }
-    it = req.find("X-Arrived-Client-nano");
-    if (it != req.end()) {
-        res.set("X-Arrived-Client-nano", it->value());
-    }
-    res.set("X-Time-Arrival-Seconds", std::to_string(seconds));
-    res.set("X-Time-Arrival-Nanoseconds", std::to_string(nanoseconds));
+    res.set("X-App-time", std::to_string(nanoseconds));
     res.body() = generate_random_text(); // Generate random text of length 100
     res.prepare_payload();
 }
