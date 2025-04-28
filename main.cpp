@@ -50,8 +50,12 @@ void handle_request(http::request<http::string_body>& req, http::response<http::
         res.set("X-Arrived-Client-time", it->value());
     }
     res.set("X-App-time", std::to_string(nanoseconds));
-    res.body() = generate_random_text(); // Generate random text of length 100
-    res.prepare_payload();
+    auto body = generate_random_text(); // Generate random text of length 100
+    if (!body.empty()) {
+        res.set(http::field::content_type, "application/text");
+        res.body() = body;
+        res.prepare_payload();
+    }
 }
 
 // Function to handle connections
