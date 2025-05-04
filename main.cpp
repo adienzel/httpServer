@@ -35,21 +35,22 @@ std::string generate_random_text() {
 
 // Function to handle HTTP requests
 void handle_request(http::request<http::string_body>& req, http::response<http::string_body>& res) {
-    auto now = std::chrono::system_clock::now();
     //auto seconds = std::chrono::duration_cast<std::chrono::seconds>(now.time_since_epoch()).count();
-    auto nanoseconds = std::chrono::duration_cast<std::chrono::nanoseconds>(now.time_since_epoch()).count();
-    
-    //auto time_value = std::to_string((double)seconds + (double)nanoseconds * 10e-9);
+    auto ns = std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
     
     res.version(req.version());
     res.result(http::status::ok);
     res.set(http::field::server, "OUR.TEST.SERVER/28");
     
-    auto it = req.find("X-Arrived-Client-time");
+    auto it = req.find("X-Arrived-time");
     if (it != req.end()) {
-        res.set("X-Arrived-Client-time", it->value());
+        res.set("X-Arrived-time", it->value());
     }
-    res.set("X-App-time", std::to_string(nanoseconds));
+    it = req.find("X-Start-Time");
+    if (it != req.end()) {
+        res.set("X-Start-Time", it->value());
+    }
+    res.set("X-App-time", std::to_string(ns));
     auto body = generate_random_text(); // Generate random text of length 100
     if (!body.empty()) {
         res.set(http::field::content_type, "application/text");
