@@ -13,8 +13,7 @@ COPY . .
 # Compile the HTTP server
 RUN g++ -o server main.cpp -lboost_system -lboost_thread -lpthread
 
-# Expose port 8080
-EXPOSE 8080
+ENV HTTP_SERVER_PORT_PORT="8080"
 
 # Command to run the server
 CMD ["./server"]

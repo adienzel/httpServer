@@ -1,16 +1,15 @@
 #!/bin/bash
 
 # Check if the correct number of arguments is provided
-if [ "$#" -ne 2 ]; then
-    echo "Usage: $0 <username> <image_name>"
+if [ "$#" -ne 1 ]; then
+    echo "Usage: $0 <image_name>"
     exit 1
 fi
 
-USERNAME=$1
-IMAGE_NAME=$2
+IMAGE_NAME=$1
 
 # Build the Docker image
-docker build -t ${USERNAME}/${IMAGE_NAME} .
+docker build -t {IMAGE_NAME} .
 
 # Push the Docker image to Docker Hub
 #docker push ${USERNAME}/${IMAGE_NAME}

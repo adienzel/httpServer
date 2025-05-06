@@ -9,6 +9,8 @@
 #include <string>
 #include <random>
 
+#include "env.h"
+
 using tcp = boost::asio::ip::tcp;       // from <boost/asio.hpp>
 namespace http = boost::beast::http;    // from <boost/beast/http.hpp>
 
@@ -77,9 +79,11 @@ void do_session(tcp::socket& socket) {
 
 // Main function to set up the server
 int main() {
+    auto port = (uint16_t)EnvUtils::getEnvInt("HTTP_SERVER_PORT_PORT", 8080);
+    
     try {
         auto const address = boost::asio::ip::make_address("0.0.0.0");
-        auto port = static_cast<unsigned short>(std::atoi("8080"));
+        //auto port = static_cast<unsigned short>(std::atoi("8080"));
         
         boost::asio::io_context ioc{1};
         tcp::acceptor acceptor{ioc, {address, port}};
