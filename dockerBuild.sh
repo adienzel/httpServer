@@ -9,7 +9,7 @@ fi
 IMAGE_NAME=$1
 
 # Build the Docker image
-docker build -t {IMAGE_NAME} .
+docker build -t ${IMAGE_NAME} .
 
 # Push the Docker image to Docker Hub
 #docker push ${USERNAME}/${IMAGE_NAME}
