@@ -36,9 +36,8 @@ std::string generate_random_text() {
 }
 
 // Function to handle HTTP requests
-void handle_request(http::request<http::string_body>& req, http::response<http::string_body>& res) {
+void handle_request(http::request<http::string_body>& req, http::response<http::string_body>& res, long ns) {
     //auto seconds = std::chrono::duration_cast<std::chrono::seconds>(now.time_since_epoch()).count();
-    auto ns = std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
     
     res.version(req.version());
     res.result(http::status::ok);
@@ -59,19 +58,26 @@ void handle_request(http::request<http::string_body>& req, http::response<http::
         res.body() = body;
         res.prepare_payload();
     }
+    auto ns1 = std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+    
+    
 }
 
 // Function to handle connections
 void do_session(tcp::socket& socket) {
     try {
+        auto ns = std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+    
         boost::beast::flat_buffer buffer;
         http::request<http::string_body> req;
         http::read(socket, buffer, req);
         
         http::response<http::string_body> res;
-        handle_request(req, res);
+        handle_request(req, res, ns);
         
         http::write(socket, res);
+        auto ns1 = std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+        std::cout << "message sent after : " << (ns1 - ns)/1000000 << std::endl;
     } catch (std::exception const& e) {
         std::cerr << "Error: " << e.what() << std::endl;
     }
